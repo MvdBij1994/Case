@@ -13,9 +13,9 @@ function genMultiplyEasy(rand){
   const b=2+Math.floor(rand()*8);
   const ans=a*b
   const contexts=[
-    (a,b)=>`MARKET SIZING — Een koffieketen overweegt een nieuwe stad. Er zijn ${b} wijken, en in elke wijk schatten we ${a} potentiële klanten per dag. Hoeveel klanten in totaal?`,
-    (a,b)=>`MARKET SIZING — Een luchtvaartmaatschappij opent ${b} nieuwe routes, elk met gemiddeld ${a} vluchten per maand. Hoeveel vluchten in totaal?`,
-    (a,b)=>`MARKET SIZING — Een streamingdienst plant ${b} promotieweken, elk met ${a} nieuwe inschrijvingen per dag. Hoeveel inschrijvingen totaal per week?`
+    (a,b)=>`Een koffieketen overweegt een nieuwe stad. Er zijn ${b} wijken, en in elke wijk schatten we ${a} potentiële klanten per dag. Hoeveel klanten in totaal?`,
+    (a,b)=>`Een luchtvaartmaatschappij opent ${b} nieuwe routes, elk met gemiddeld ${a} vluchten per maand. Hoeveel vluchten in totaal?`,
+    (a,b)=>`Een streamingdienst plant ${b} promotieweken, elk met ${a} nieuwe inschrijvingen per dag. Hoeveel inschrijvingen totaal per week?`
   ]
   return {id:`mul-easy-${a}-${b}`,topic:'Case: market sizing',prompt:pick(rand,contexts)(a,b),hint:'Splits in tientallen en eenheden.',input:'integer',tol:0,answerText:String(ans),answerValue:ans,explain:steps('Splits in tientallen en eenheden.','Bereken tientallen × '+b+'.','Bereken eenheden × '+b+'.','Tel op tot '+ans+'.')}
 }
@@ -25,9 +25,9 @@ function genDivisionExact(rand){
   const q=3+Math.floor(rand()*13)
   const a=b*q
   const contexts=[
-    (a,b)=>`OPERATIONS — Een logistieke speler heeft ${a} vrachtwagens en wil ze gelijk verdelen over ${b} hubs. Hoeveel per hub?`,
-    (a,b)=>`OPERATIONS — Een projectteam plant ${a} interviews, gelijk verdeeld over ${b} consultants. Hoeveel per consultant?`,
-    (a,b)=>`OPERATIONS — Een producent verdeelt ${a} pallets gelijk over ${b} DC’s. Hoeveel pallets per DC?`
+    (a,b)=>`Een logistieke speler heeft ${a} vrachtwagens en wil ze gelijk verdelen over ${b} hubs. Hoeveel per hub?`,
+    (a,b)=>`Een projectteam plant ${a} interviews, gelijk verdeeld over ${b} consultants. Hoeveel per consultant?`,
+    (a,b)=>`Een producent verdeelt ${a} pallets gelijk over ${b} DC’s. Hoeveel pallets per DC?`
   ]
   return {id:`div-exact-${a}-${b}`,topic:'Case: operations capacity',prompt:pick(rand,contexts)(a,b),hint:'a = b × ?',input:'integer',tol:0,answerText:String(q),answerValue:q,explain:steps(`${a} = ${b} × ${q}`,`Dus ${a} ÷ ${b} = ${q}`)}
 }
@@ -38,9 +38,9 @@ function genPercentOfFriendly(rand){
   const base=multipleOf(rand,opt.base,80,800)
   const ans=(opt.pct/100)*base
   const contexts=[
-    (pct,base)=>`MARKET SHARE — Totale markt: ${base}k gebruikers. Wat is het aantal klanten bij ${pct}% marktaandeel?`,
-    (pct,base)=>`PENETRATION — Een telco heeft ${base}k aansluitingen. Hoeveel actief bij ${pct}% activatie?`,
-    (pct,base)=>`CATEGORY MIX — Weekomzet €${base}m. Hoeveel omzet in premiumcategorie bij ${pct}% aandeel?`
+    (pct,base)=>`Totale markt: ${base}k gebruikers. Wat is het aantal klanten bij ${pct}% marktaandeel?`,
+    (pct,base)=>`Een telco heeft ${base}k aansluitingen. Hoeveel actief bij ${pct}% activatie?`,
+    (pct,base)=>`Weekomzet €${base}m. Hoeveel omzet in de premiumcategorie bij ${pct}% aandeel?`
   ]
   return {id:`pct-of-${opt.pct}-${base}`,topic:'Case: market share',prompt:pick(rand,contexts)(opt.pct,base),hint:`Bereken ${opt.pct}% van ${base}.`,input:'integer',tol:0,answerText:String(ans),answerValue:ans,explain:steps(`Bereken ${opt.pct}% van ${base} = ${ans}`)}
 }
@@ -53,9 +53,9 @@ function genMarkupMarkdownFriendly(rand){
   const newVal=o.sign>0?base+delta:base-delta
   const signLabel=o.sign>0?'stijgt':'daalt'
   const contexts=[
-    (l,p,b)=>`PRICING — Een fabrikant overweegt een prijs die ${l} met ${p}% vanaf €${b}. Wat wordt de nieuwe prijs per eenheid?`,
-    (l,p,b)=>`PRICING — Een SaaS‑aanbieder wijzigt zijn tarief dat ${l} met ${p}% vanaf €${b}. Wat is het nieuwe maandbedrag?`,
-    (l,p,b)=>`PRICING — Een exporteur past de FOB‑prijs aan die ${l} met ${p}% vanaf €${b}. Wat wordt de nieuwe prijs?`
+    (l,p,b)=>`Een fabrikant overweegt een prijs die ${l} met ${p}% vanaf €${b}. Wat wordt de nieuwe prijs per eenheid?`,
+    (l,p,b)=>`Een SaaS‑aanbieder wijzigt zijn tarief dat ${l} met ${p}% vanaf €${b}. Wat is het nieuwe maandbedrag?`,
+    (l,p,b)=>`Een exporteur past de FOB‑prijs aan die ${l} met ${p}% vanaf €${b}. Wat wordt de nieuwe prijs?`
   ]
   return {id:`mark-${o.sign}-${o.pct}-${base}`,topic:'Case: pricing impact',prompt:pick(rand,contexts)(signLabel,o.pct,base),hint:`${o.pct}% van ${base} is ${delta}.`,input:'integer',tol:0,answerText:String(newVal),answerValue:newVal,explain:steps(`Bereken ${o.pct}% van ${base} = ${delta}`,`Pas toe op basisprijs: ${newVal}`)}
 }
