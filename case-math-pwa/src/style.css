@@ -1,17 +1,66 @@
-:root { color-scheme: light dark; }
+/* Forceer lichte kleurenset zodat dark mode niet alles omkleurt */
+:root { color-scheme: light; }
+
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background: #f6f7f9; }
+
+/* Basis: goede contrastkleuren */
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background: #f9fafb;      /* lichtgrijs */
+  color: #111827;           /* bijna zwart */
+}
+
 .container { max-width: 720px; margin: 0 auto; padding: 16px; }
-.card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+
+/* Kaarten altijd wit met subtiele schaduw */
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+
+/* Teksten in hints/uitwerkingen goed leesbaar */
 .hint, .explain { color: #374151; font-size: 14px; }
-.btn { border-radius: 12px; padding: 10px 14px; border: 1px solid #e5e7eb; background: #fff; }
-.btn.primary { background: #111; color: #fff; border-color: #111; }
-.input { width: 100%; border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 14px; font-size: 16px; }
-.input.ok { border-color: #16a34a; }
-.input.err { border-color: #dc2626; }
+
+/* Knoppen */
+.btn {
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+}
+.btn:hover { background: #f3f4f6; }
+
+.btn.primary {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+.btn.primary:hover { background: #0b0b0b; }
+
+/* Inputveld: wit met zwarte tekst, duidelijke states */
+.input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 16px;
+  background: #ffffff;
+  color: #111827;
+}
+.input::placeholder { color: #6b7280; }
+.input:focus { outline: none; box-shadow: 0 0 0 2px rgba(17,17,17,.15); }
+.input.ok { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,.15); }
+.input.err { border-color: #dc2626; box-shadow: 0 0 0 2px rgba(220,38,38,.15); }
+
+/* Layout/kleine styles */
 .controls { display: flex; gap: 8px; flex-wrap: wrap; }
 .progress { color: #4b5563; font-size: 14px; }
-.title { font-size: 22px; font-weight: 700; margin: 8px 0 4px; }
+.title { font-size: 22px; font-weight: 700; margin: 8px 0 4px; color: #0f172a; }
 .topic { text-transform: uppercase; color: #6b7280; font-size: 12px; letter-spacing: .06em; margin-bottom: 6px; }
-.prompt { font-size: 18px; margin-bottom: 12px; }
+.prompt { font-size: 18px; margin-bottom: 12px; color: #111827; }
 ol { padding-left: 20px; }
