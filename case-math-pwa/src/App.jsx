@@ -8,43 +8,54 @@ const pick=(r,arr)=>arr[Math.floor(r()*arr.length)]
 function multipleOf(r,base,min,max){const s=Math.ceil(min/base),e=Math.floor(max/base);const k=s+Math.floor(r()*(e-s+1));return k*base}
 const steps=(...a)=>a
 
+// Variatie: sectoren/steden
+const SECTORS = ['retail','telecom','luchtvaart','SaaS','streaming','logistiek','consumptiegoederen'];
+const CITIES  = ['Amsterdam','Rotterdam','Utrecht','Eindhoven','Antwerpen','Brussel','Keulen','Hamburg'];
+
+// 1) Market sizing (multiplication)
 function genMultiplyEasy(rand){
-  const a=10+Math.floor(rand()*80);
-  const b=2+Math.floor(rand()*8);
+  const a=10+Math.floor(rand()*80);    // 10..89
+  const b=2+Math.floor(rand()*8);      // 2..9
+  const city = pick(rand, CITIES);
+  const sector = pick(rand, SECTORS);
   const ans=a*b
   const contexts=[
-    (a,b)=>`Een koffieketen overweegt een nieuwe stad. Er zijn ${b} wijken, en in elke wijk schatten we ${a} potentiële klanten per dag. Hoeveel klanten in totaal?`,
+    (a,b)=>`Een ${sector}-keten overweegt ${city}. Er zijn ${b} wijken; per wijk schatten we ${a} potentiële klanten per dag. Hoeveel klanten in totaal?`,
     (a,b)=>`Een luchtvaartmaatschappij opent ${b} nieuwe routes, elk met gemiddeld ${a} vluchten per maand. Hoeveel vluchten in totaal?`,
     (a,b)=>`Een streamingdienst plant ${b} promotieweken, elk met ${a} nieuwe inschrijvingen per dag. Hoeveel inschrijvingen totaal per week?`
   ]
   return {id:`mul-easy-${a}-${b}`,topic:'Case: market sizing',prompt:pick(rand,contexts)(a,b),hint:'Splits in tientallen en eenheden.',input:'integer',tol:0,answerText:String(ans),answerValue:ans,explain:steps('Splits in tientallen en eenheden.','Bereken tientallen × '+b+'.','Bereken eenheden × '+b+'.','Tel op tot '+ans+'.')}
 }
 
+// 2) Operations capacity (division exact)
 function genDivisionExact(rand){
   const b=2+Math.floor(rand()*8)
   const q=3+Math.floor(rand()*13)
   const a=b*q
+  const city = pick(rand, CITIES);
   const contexts=[
-    (a,b)=>`Een logistieke speler heeft ${a} vrachtwagens en wil ze gelijk verdelen over ${b} hubs. Hoeveel per hub?`,
+    (a,b)=>`Een logistieke speler in ${city} heeft ${a} vrachtwagens en wil ze gelijk verdelen over ${b} hubs. Hoeveel per hub?`,
     (a,b)=>`Een projectteam plant ${a} interviews, gelijk verdeeld over ${b} consultants. Hoeveel per consultant?`,
     (a,b)=>`Een producent verdeelt ${a} pallets gelijk over ${b} DC’s. Hoeveel pallets per DC?`
   ]
   return {id:`div-exact-${a}-${b}`,topic:'Case: operations capacity',prompt:pick(rand,contexts)(a,b),hint:'a = b × ?',input:'integer',tol:0,answerText:String(q),answerValue:q,explain:steps(`${a} = ${b} × ${q}`,`Dus ${a} ÷ ${b} = ${q}`)}
 }
 
+// 3) Market share / penetration (percent of total, in duizenden)
 const PCT_OPTIONS=[{pct:50,base:2},{pct:25,base:4},{pct:75,base:4},{pct:20,base:5},{pct:10,base:10},{pct:5,base:20},{pct:12.5,base:8}]
 function genPercentOfFriendly(rand){
   const opt=pick(rand,PCT_OPTIONS)
-  const base=multipleOf(rand,opt.base,80,800)
+  const base=multipleOf(rand,opt.base,80,800) // 80..800 (in 'k')
   const ans=(opt.pct/100)*base
   const contexts=[
-    (pct,base)=>`Totale markt: ${base}k gebruikers. Wat is het aantal klanten bij ${pct}% marktaandeel?`,
-    (pct,base)=>`Een telco heeft ${base}k aansluitingen. Hoeveel actief bij ${pct}% activatie?`,
-    (pct,base)=>`Weekomzet €${base}m. Hoeveel omzet in de premiumcategorie bij ${pct}% aandeel?`
+    (pct,base)=>`Totale markt: ${base}k gebruikers. Wat is het aantal klanten bij ${pct}% marktaandeel? (antwoord in duizenden)`,
+    (pct,base)=>`Een telco heeft ${base}k aansluitingen. Hoeveel actief bij ${pct}% activatie? (antwoord in duizenden)`,
+    (pct,base)=>`Weekomzet is €${base}m. Hoeveel omzet in de premiumcategorie bij ${pct}% aandeel? (antwoord in miljoenen)`
   ]
   return {id:`pct-of-${opt.pct}-${base}`,topic:'Case: market share',prompt:pick(rand,contexts)(opt.pct,base),hint:`Bereken ${opt.pct}% van ${base}.`,input:'integer',tol:0,answerText:String(ans),answerValue:ans,explain:steps(`Bereken ${opt.pct}% van ${base} = ${ans}`)}
 }
 
+// 4) Pricing impact (markup/markdown)
 const MARK_OPTIONS=[{sign:+1,pct:10,base:10},{sign:-1,pct:10,base:10},{sign:+1,pct:20,base:5},{sign:-1,pct:20,base:5},{sign:+1,pct:25,base:4},{sign:-1,pct:25,base:4},{sign:+1,pct:50,base:2},{sign:-1,pct:50,base:2}]
 function genMarkupMarkdownFriendly(rand){
   const o=pick(rand,MARK_OPTIONS)
@@ -60,13 +71,67 @@ function genMarkupMarkdownFriendly(rand){
   return {id:`mark-${o.sign}-${o.pct}-${base}`,topic:'Case: pricing impact',prompt:pick(rand,contexts)(signLabel,o.pct,base),hint:`${o.pct}% van ${base} is ${delta}.`,input:'integer',tol:0,answerText:String(newVal),answerValue:newVal,explain:steps(`Bereken ${o.pct}% van ${base} = ${delta}`,`Pas toe op basisprijs: ${newVal}`)}
 }
 
-const TEMPLATES=[genMultiplyEasy,genDivisionExact,genPercentOfFriendly,genMarkupMarkdownFriendly]
+// 5) Unit economics: korting + hoeveelheid (revenue)
+const DISC_PCT = [5,10,20,25,50];              // ronde percentages
+function genDiscountRevenue(rand){
+  const priceBase = multipleOf(rand,5,20,200); // prijs in € (veelvoud van 5)
+  const pct = pick(rand, DISC_PCT);
+  const qty = multipleOf(rand,5,10,100);      // hoeveelheid (veelvoud van 5)
+  const discount = (pct/100)*priceBase;
+  const newPrice = priceBase - discount;
+  const revenue = newPrice * qty;
+  return {
+    id:`disc-${priceBase}-${pct}-${qty}`,
+    topic:'Case: unit economics',
+    prompt:`Een product kost €${priceBase}. Er geldt ${pct}% korting. Je verkoopt ${qty} stuks. Wat is de omzet (in euro’s)?`,
+    hint:`Bereken nieuwe prijs = prijs − ${pct}% van prijs; vermenigvuldig met hoeveelheid.`,
+    input:'integer', tol:0,
+    answerText:String(revenue), answerValue:revenue,
+    explain:steps(
+      `${pct}% van €${priceBase} = €${discount}.`,
+      `Nieuwe prijs = €${priceBase} − €${discount} = €${newPrice}.`,
+      `Omzet = €${newPrice} × ${qty} = €${revenue}.`
+    )
+  }
+}
+
+// 6) Market share → klanten → ARPU (omzet in duizenden)
+const ARPU_OPTIONS = [5,10,20,25,50]; // euro, eenvoudige veelvouden
+function genShareArpuRevenueK(rand){
+  const pct = pick(rand, [10,20,25,50]);                 // ronde share
+  const baseK = multipleOf(rand,5,80,800);               // markt in duizenden
+  const customersK = (pct/100)*baseK;                    // antwoord in 'k'
+  const arpu = pick(rand, ARPU_OPTIONS);
+  const revenueK = customersK * arpu;                    // omzet in duizenden €
+  return {
+    id:`share-arpu-${pct}-${baseK}-${arpu}`,
+    topic:'Case: omzet uit marktaandeel',
+    prompt:`Totale markt: ${baseK}k klanten. Het merk pakt ${pct}% marktaandeel en ARPU is €${arpu}. Wat is de omzet (antwoord in duizenden euro’s)?`,
+    hint:`Klanten (in k) = ${pct}% × ${baseK}. Vermenigvuldig met ARPU.`,
+    input:'integer', tol:0,
+    answerText:String(revenueK), answerValue:revenueK,
+    explain:steps(
+      `Klanten = ${pct}% × ${baseK}k = ${customersK}k.`,
+      `Omzet (in k) = ${customersK} × €${arpu} = ${revenueK}k.`
+    )
+  }
+}
+
+const TEMPLATES=[
+  genMultiplyEasy,
+  genDivisionExact,
+  genPercentOfFriendly,
+  genMarkupMarkdownFriendly,
+  genDiscountRevenue,
+  genShareArpuRevenueK,
+]
+
 function shuffle(r,arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 function ExerciseCard({ ex, onSolved }){
   const [value,setValue]=useState('')
   const [status,setStatus]=useState(null)
-  const [showHint,setShowHint]=useState(false)
+  const [showHint,setShowHint]==useState(false)
   const [showSol,setShowSol]=useState(false)
   function check(){
     if(!value.trim())return
@@ -108,7 +173,7 @@ function ExerciseCard({ ex, onSolved }){
   )
 }
 
-function buildSet(seedStr,count=5){
+function buildSet(seedStr,count=10){ // ⟵ nu 10 per dag
   const rand=seededRand(seedStr)
   const chosen=[]
   const order=shuffle(rand,TEMPLATES)
@@ -123,7 +188,7 @@ function buildSet(seedStr,count=5){
 
 export default function App(){
   const todayKey=new Date().toISOString().slice(0,10)
-  const dailyExercises=useMemo(()=>buildSet(`daily-${todayKey}`,5),[todayKey])
+  const dailyExercises=useMemo(()=>buildSet(`daily-${todayKey}`,10),[todayKey]) // ⟵ 10
   const [solved,setSolved]=useState(0)
   return (
     <div className="container">
